@@ -1,0 +1,58 @@
+---
+title: "N-gram EDA"
+author: "John Goodwin"
+date: "5/28/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+## Load Data
+
+```{r load_data}
+twitter <- read_lines("data/coursera-swiftkey/final/en_us/en_US.twitter.txt")
+news <- read_lines("data/coursera-swiftkey/final/en_us/en_US.news.txt")
+blogs <- read_lines("data/coursera-swiftkey/final/en_us/en_US.blogs.txt")
+
+en_us_text <- bind_rows(
+  bind_cols(Source = "Twitter", text = twitter),
+  bind_cols(Source = "News", text = news),
+  bind_cols(Source = "Blogs", text = blogs)
+) %>% mutate(nchars = nchar(text))
+
+rm(twitter, news, blogs)
+```
+
+## File Summaries
+
+```{r histogram, fig.cap="Histograms for Blogs and News capped at 99th percentile to remove outliers"}
+en_us_text %>%
+  group_by(Source) %>%
+  mutate(nchars_99_percentile = quantile(nchars, .99)) %>%
+  filter(nchars < nchars_99_percentile | Source == "Twitter") %>%
+  ggplot(aes(nchars)) +
+  facet_grid(~Source,scales = "free") +
+  geom_histogram(color = 'black', alpha = 0.7, bins = 20) +
+  theme_bw() +
+  xlab("Number of Characters") +
+  ylab("Number of Observations") +
+  ggtitle("Histogram of String Length by Source")
+```
+
+WORD hists
+
+```{r}
+en_us_text %>%
+  group_by(Source) %>%
+  summarise(cnt = n(), 
+            min = min(nchars), 
+            max = max(nchars), 
+            mean = mean(nchars), 
+            median = median(nchars), 
+            standard_dev = sd(nchars))
+```
+
+word stats
