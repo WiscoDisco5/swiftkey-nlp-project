@@ -8,9 +8,12 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
+library(tidytext)
 ```
 
 ## Load Data
+
+Data has been provided via 3 text files. For this analysis, these files will be combined into one table with each source noted in a "Source" column.
 
 ```{r load_data}
 twitter <- read_lines("data/coursera-swiftkey/final/en_us/en_US.twitter.txt")
@@ -18,17 +21,30 @@ news <- read_lines("data/coursera-swiftkey/final/en_us/en_US.news.txt")
 blogs <- read_lines("data/coursera-swiftkey/final/en_us/en_US.blogs.txt")
 
 en_us_text <- bind_rows(
-  bind_cols(Source = "Twitter", text = twitter),
-  bind_cols(Source = "News", text = news),
-  bind_cols(Source = "Blogs", text = blogs)
-) %>% mutate(nchars = nchar(text))
+  bind_cols(Source = "Twitter", Text = twitter),
+  bind_cols(Source = "News", Text = news),
+  bind_cols(Source = "Blogs", Text = blogs)
+) %>% mutate(nchars = nchar(Text)) %>%
+  group_by(Source) %>%
+  mutate(Document = row_number()) %>%
+  select(Source, Document, Text, nchars)
 
 rm(twitter, news, blogs)
 ```
 
-## File Summaries
+Each source contains many "documents" where documents can be defined as groups or "bags" of words. In this context, a single Tweet could be considered a document. Here are the number of documents per source:
 
-```{r histogram, fig.cap="Histograms for Blogs and News capped at 99th percentile to remove outliers"}
+```{r documents}
+en_us_text %>%
+  group_by(Source) %>%
+  summarise(`Document Count` = n())
+```
+
+## Document Analysis
+
+Each document in this analysis can contain many characters and many words. The number of characters can greatly vary by source. For example, while a Tweet can be limited to 140 characters, Blogs and News articles can be as long as the author (or publisher) wants. The following histograms visualize the number of characters from the documents by source:
+
+```{r nchar_histogram, fig.cap="Histograms for Blogs and News capped at 99th percentile to remove outliers"}
 en_us_text %>%
   group_by(Source) %>%
   mutate(nchars_99_percentile = quantile(nchars, .99)) %>%
@@ -38,21 +54,54 @@ en_us_text %>%
   geom_histogram(color = 'black', alpha = 0.7, bins = 20) +
   theme_bw() +
   xlab("Number of Characters") +
-  ylab("Number of Observations") +
+  ylab("Number of Documents") +
   ggtitle("Histogram of String Length by Source")
 ```
 
-WORD hists
+The chracters can be further summarized via the following table:
 
-```{r}
+```{r nchar_table}
 en_us_text %>%
   group_by(Source) %>%
-  summarise(cnt = n(), 
-            min = min(nchars), 
-            max = max(nchars), 
-            mean = mean(nchars), 
-            median = median(nchars), 
-            standard_dev = sd(nchars))
+  summarise(`Minimum Number of Characters` = min(nchars), 
+            `Maximum Number of Characters` = max(nchars), 
+            `Average Number of Characters` = mean(nchars), 
+            `Median Number of Characters` = median(nchars))
 ```
 
-word stats
+As expected, Twitter has the fewest characters given the 140 character limit. Blogs have the highest number of characters followed by News sources. Blogs also appear to have the highest level of dispersion in number of characters.
+
+## Word Analysis
+
+```{r word_histogram}
+en_us_words <- en_us_text %>%
+  group_by(Source, Document) %>%
+  unnest_tokens(words, Text, token = 'words')
+
+
+words_summary <- en_us_words %>%
+  summarise(word_count = n())
+
+words_summary %>%
+  group_by(Source) %>%
+  mutate(word_count_99_percentile = quantile(word_count, .99)) %>%
+  filter(word_count < word_count_99_percentile) %>%
+  ggplot(aes(word_count)) +
+  facet_grid(~Source,scales = "free") +
+  geom_histogram(color = 'black', alpha = 0.7, bins = 20) +
+  theme_bw() +
+  xlab("Number of Words in Document") +
+  ylab("Number of Documents") +
+  ggtitle("Histogram of Words Per Document by Source")
+```
+
+```{r word_table}
+words_summary %>%
+  group_by(Source) %>%
+  summarise(`Minimum Number of Words` = min(word_count), 
+            `Maximum Number of Words` = max(word_count), 
+            `Average Number of Words` = mean(word_count), 
+            `Median Number of Words` = median(word_count))
+```
+
+
