@@ -1,5 +1,5 @@
 ---
-title: "N-gram EDA"
+title: "SwiftKey Data Analysis"
 author: "John Goodwin"
 date: "5/28/2021"
 output: html_document
@@ -13,9 +13,9 @@ library(tidytext)
 
 ## Load Data
 
-Data has been provided via 3 text files. For this analysis, these files will be combined into one table with each source noted in a "Source" column.
+Data has been provided via 3 text files. Each line in each file represents a "document" where a document can be defined as a group or "bag" of words. In this context, a single Tweet could be considered a document. For this analysis, these files will be combined into one table with each source noted in a "Source" column and each document numbered by source in a "Document" column. Here is the first document for each source in the data (truncating the text to 30 characters):
 
-```{r load_data}
+```{r load_data, echo=FALSE, warning=FALSE, message = FALSE}
 twitter <- read_lines("data/coursera-swiftkey/final/en_us/en_US.twitter.txt")
 news <- read_lines("data/coursera-swiftkey/final/en_us/en_US.news.txt")
 blogs <- read_lines("data/coursera-swiftkey/final/en_us/en_US.blogs.txt")
@@ -30,21 +30,30 @@ en_us_text <- bind_rows(
   select(Source, Document, Text, nchars)
 
 rm(twitter, news, blogs)
+
+en_us_text %>%
+  slice(1) %>%
+  select(Source, Document, Text) %>%
+  mutate(Text = str_trunc(Text, 30)) %>%
+  knitr::kable()
 ```
 
-Each source contains many "documents" where documents can be defined as groups or "bags" of words. In this context, a single Tweet could be considered a document. Here are the number of documents per source:
+Here are the number of documents per source:
 
-```{r documents}
+```{r documents, echo=FALSE, warning=FALSE, message = FALSE}
 en_us_text %>%
   group_by(Source) %>%
-  summarise(`Document Count` = n())
+  summarise(`Document Count` = n()) %>%
+  knitr::kable()
 ```
 
 ## Document Analysis
 
-Each document in this analysis can contain many characters and many words. The number of characters can greatly vary by source. For example, while a Tweet can be limited to 140 characters, Blogs and News articles can be as long as the author (or publisher) wants. The following histograms visualize the number of characters from the documents by source:
+### Number of Characters Per Document
 
-```{r nchar_histogram, fig.cap="Histograms for Blogs and News capped at 99th percentile to remove outliers"}
+Each document in this analysis can contain many characters and many words. The number of characters can greatly vary by source. For example, while a Tweet can be limited to 140 characters, Blogs and News articles can be as long as the author (or publisher) wants. The following histograms visualize the number of characters in each documents by source:
+
+```{r nchar_histogram, echo=FALSE, warning=FALSE, message = FALSE, fig.cap="Histograms for Blogs and News capped at 99th percentile to remove outliers"}
 en_us_text %>%
   group_by(Source) %>%
   mutate(nchars_99_percentile = quantile(nchars, .99)) %>%
@@ -58,30 +67,40 @@ en_us_text %>%
   ggtitle("Histogram of String Length by Source")
 ```
 
-The chracters can be further summarized via the following table:
+The characters can be further summarized via the following table:
 
-```{r nchar_table}
+```{r nchar_table, echo=FALSE, warning=FALSE, message = FALSE}
 en_us_text %>%
   group_by(Source) %>%
   summarise(`Minimum Number of Characters` = min(nchars), 
             `Maximum Number of Characters` = max(nchars), 
             `Average Number of Characters` = mean(nchars), 
-            `Median Number of Characters` = median(nchars))
+            `Median Number of Characters` = median(nchars),
+            `Standard Deviation of Characters` = sd(nchars)) %>%
+  knitr::kable()
 ```
 
-As expected, Twitter has the fewest characters given the 140 character limit. Blogs have the highest number of characters followed by News sources. Blogs also appear to have the highest level of dispersion in number of characters.
+As expected, Twitter has the fewest characters given the 140 character limit. Blogs have the highest number of characters (on average) followed by News sources. Blogs also appear to have the highest level of dispersion in number of characters with a wide range between the maximum/minimum number of characters.
 
-## Word Analysis
+### Number of Words Per Document
 
-```{r word_histogram}
+Similarly, one can study the number of words in each document. This requires more data manipulation, however. Each document can be broken out into the individual words in each document. Leveraging the `unnest_tokens` function in the `tidytext` package, each word in each document in our dataset can be broken out into it's own row to make the data [tidy](https://www.tidytextmining.com/preface.html). The reshaped data appears as follows:
+
+```{r word_breakout, echo=FALSE, warning=FALSE, message = FALSE}
 en_us_words <- en_us_text %>%
   group_by(Source, Document) %>%
   unnest_tokens(words, Text, token = 'words')
 
-
 words_summary <- en_us_words %>%
   summarise(word_count = n())
 
+en_us_words[1:10,] %>%
+  knitr::kable()
+```
+
+Finally, we can study the number of words/tokens in each document. The following histogram gives the distribution of the number of words in each document:
+
+```{r word_histogram, echo=FALSE, warning=FALSE, message = FALSE, fig.cap="Histograms capped at 99th percentile to remove outliers"}
 words_summary %>%
   group_by(Source) %>%
   mutate(word_count_99_percentile = quantile(word_count, .99)) %>%
@@ -95,13 +114,17 @@ words_summary %>%
   ggtitle("Histogram of Words Per Document by Source")
 ```
 
-```{r word_table}
+The data is further summarized below:
+
+```{r word_table, echo=FALSE, warning=FALSE, message = FALSE}
 words_summary %>%
   group_by(Source) %>%
   summarise(`Minimum Number of Words` = min(word_count), 
             `Maximum Number of Words` = max(word_count), 
             `Average Number of Words` = mean(word_count), 
-            `Median Number of Words` = median(word_count))
+            `Median Number of Words` = median(word_count),
+            `Standard Deviation of Words` = sd(word_count)) %>%
+  knitr::kable()
 ```
 
-
+Similar to the number of characters in each document, Tweets appear to be the smallest documents (again, on average) while blogs are the largest.

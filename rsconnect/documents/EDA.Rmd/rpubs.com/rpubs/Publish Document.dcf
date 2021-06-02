@@ -1,0 +1,11 @@
+name: Publish Document
+title:
+username:
+account: rpubs
+server: rpubs.com
+hostUrl: rpubs.com
+appId: https://api.rpubs.com/api/v1/document/776675/5f3872c7fad0438dadd000a5f45c7892
+bundleId: https://api.rpubs.com/api/v1/document/776675/5f3872c7fad0438dadd000a5f45c7892
+url: http://rpubs.com/WiscoDisco5/776675
+when: 1622595596.69326
+lastSyncTime: 1622595596.69326
