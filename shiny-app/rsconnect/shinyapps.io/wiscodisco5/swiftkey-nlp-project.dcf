@@ -5,9 +5,9 @@ account: wiscodisco5
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 4236813
-bundleId: 4685810
+bundleId: 4685825
 url: https://wiscodisco5.shinyapps.io/swiftkey-nlp-project/
-when: 1623041182.07614
-lastSyncTime: 1623041182.07614
+when: 1623041877.50044
+lastSyncTime: 1623041877.50044
 asMultiple: FALSE
 asStatic: FALSE

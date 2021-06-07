@@ -51,7 +51,7 @@ ui <- navbarPage(
                href = "https://d396qusza40orc.cloudfront.net/dsscapstone/dataset/Coursera-SwiftKey.zip"),
              "Examples provided by other bloggers analysis helped guide this project. In particular, the",
              a("SBO vignette by Valerio Gherardi,",
-               href = "https://cran.r-project.org/web/packages/sbo/vignettes/sbo.html)"),
+               href = "https://cran.r-project.org/web/packages/sbo/vignettes/sbo.html"),
              "the",
              a("TensorFlow example from Julia Silge,",
                href = "https://www.r-bloggers.com/2018/10/tensorflow-jane-austen-and-text-generation/"),
