@@ -7,12 +7,12 @@ ngram_model <- load("../models/ngram_model.Rda")
 # Define UI for app that draws a histogram ----
 ui <- navbarPage(
   # App title ----
-  "Next Word Prediction Tool",
+  strong("Next Word Prediction Application"),
   
   theme = shinytheme("flatly"),
   
   # Sidebar layout with input and output definitions ----
-  tabPanel("Next Word",
+  tabPanel("Prediction Tool",
     
     # Sidebar panel for inputs ----
     sidebarPanel(
@@ -26,9 +26,9 @@ ui <- navbarPage(
     mainPanel(
       tabsetPanel(type = "tabs",
                   tabPanel("Next Word Predictions",
-                           textOutput("words")),
+                           htmlOutput("words")),
                   tabPanel("Babble",
-                           textOutput("babble"))),
+                           htmlOutput("babble"))),
       width = 8
     )),
   tabPanel("Documentation",

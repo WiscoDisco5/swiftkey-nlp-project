@@ -4,14 +4,16 @@ server <- function(input, output, session) {
   
   get_words <- eventReactive(input$Run,{
     
-    predict(ngram_model, input$text)
+    words <- predict(ngram_model, input$text)
+    words <- gsub("<EOS>", ".!?", words)
+    paste0("<code>", words, "</code>")
     
   })
   
   get_babble <- eventReactive(input$Run,{
 
-    babble(ngram_model, input$text)
-    
+    babble_sentence <- babble(ngram_model, input$text)
+    paste0("<pre><code>", babble_sentence, "</pre></code>")
   })
 
   output$words <- renderText({
