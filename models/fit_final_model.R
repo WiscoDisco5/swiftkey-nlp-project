@@ -23,7 +23,7 @@ ngram_model <- sbo_predictor(object = train_text$text,
                              L = 3L, # Number of predictions for input
                              filtered = c("<UNK>")) # Exclude the <UNK> token from predictions
 
-saveRDS(ngram_model, "./models/ngram_model.rds")                             
+save(ngram_model, file = "models/ngram_model.Rda")
 
 # check final error
 rm(train_text); gc()
