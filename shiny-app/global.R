@@ -1,0 +1,6 @@
+library(tidyverse)
+library(shiny)
+library(shinythemes)
+library(sbo)
+load("ngram_model.Rda")
+ngram_model <- sbo_predictor(ngram_model)

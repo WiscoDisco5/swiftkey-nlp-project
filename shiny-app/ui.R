@@ -1,9 +1,3 @@
-library(tidyverse)
-library(shiny)
-library(shinythemes)
-library(sbo)
-ngram_model <- load("../models/ngram_model.Rda")
-
 # Define UI for app that draws a histogram ----
 ui <- navbarPage(
   # App title ----
