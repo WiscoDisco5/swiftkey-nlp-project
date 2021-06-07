@@ -22,18 +22,8 @@ rm(twitter, news, blogs); gc()
 
 pryr::object_size(en_us_text)
 
-# Get a Hold Out Dataset
-set.seed(451)
-
-train <- rbernoulli(nrow(en_us_text), 0.75)
-
-en_us_text_train <- en_us_text[train,]
-en_us_text_test <- en_us_text[!train,]
-
-rm(en_us_text); gc()
-
 # Tokenize ngrams
-format_modeling_text <- function(data, prior_words = 4, sample_rows = NULL) {
+format_modeling_ngrams <- function(data, prior_words = 4, sample_rows = NULL) {
   
   data %>%
     { if (is.null(sample_rows)) {
@@ -42,14 +32,14 @@ format_modeling_text <- function(data, prior_words = 4, sample_rows = NULL) {
       }
     } %>%
     unnest_tokens(input = text, output =  ngram, token = "ngrams", n = prior_words + 1) %>%
-    separate(col = ngram, 
-             into = c(paste0("previous_word", 1:prior_words), "next_word"), 
-             sep = " ",
-             extra = "merge")
+    mutate(ngram = stri_reverse(ngram)) %>%
+    separate(ngram, c("next_word", "prior_words"), sep = " ",extra = "merge") %>%
+    mutate(next_word = stri_reverse(next_word), prior_words = stri_reverse(prior_words)) %>%
+    select(source, document, prior_words, next_word)
 }
 
 # this doesnt seem to scale well...
-format_modeling_text(data = en_us_text_train, sample_rows = 10000)
+#format_modeling_text(data = en_us_text_train, sample_rows = 10000)
 
 # Tokenize words
 format_modeling_text <- function(data, sample_rows = NULL) {
@@ -60,7 +50,25 @@ format_modeling_text <- function(data, sample_rows = NULL) {
         sample_n(., sample_rows)
       }
     } %>%
-    unnest_tokens(input = text, output =  ngram, token = "words")
+    unnest_tokens(input = text, output =  words, token = "words")
 }
 
-format_modeling_text(en_us_text_train, 100)
+#format_modeling_text(en_us_text_train, 100)
+
+# Tokenize letters
+format_modeling_characters <- function(data, sample_rows = NULL) {
+  
+  data %>%
+    { if (is.null(sample_rows)) {
+      . } else {
+        sample_n(., sample_rows)
+      }
+    } %>%
+    unnest_tokens(input = text, 
+                  output =  characters, 
+                  token = "characters",
+                  strip_non_alphanum = FALSE,
+                  to_lower = FALSE)
+}
+
+#format_modeling_characters(en_us_text_train, 10000)
