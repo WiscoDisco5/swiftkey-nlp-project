@@ -58,7 +58,7 @@ ui <- navbarPage(
              "and the",
              a("Markov chain example from Alex Bresler",
                href = "https://github.com/abresler/markovifyR"),
-             "were all influential on this final model desing.",
+             "were all influential on this final model design.",
              "Finally, the source code for this project can be found on",
              a("GitHub",
                href = "https://github.com/WiscoDisco5/swiftkey-nlp-project"
