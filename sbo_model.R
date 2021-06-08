@@ -44,6 +44,8 @@ for (i in 1:nrow(parameters)) {
   print(paste("Model", i, "done"))
 }
 
+results
+
 # lambda of 0.4 seems best
 # time is pretty much the same across the board
 
@@ -60,8 +62,11 @@ for (i in 1:nrow(parameters)) {
 }
 
 times <- sapply(results, function(x) as.double(x$fit_time, units = 'secs'))
+accuracy <- sapply(results, function(x) x$accuracy)
+ngram_results <- data.frame(n = n_options, time = times, accuracy = accuracy)
+write.csv(ngram_results, "./data/ngram_tuning_results.csv")
 
-qplot(n_options, times)
+qplot(n_options, times,xlab = "N-gram", ylab = "Time (seconds)",)
 #time seems to double per ngram increase
 
 ## Will more data be better?
