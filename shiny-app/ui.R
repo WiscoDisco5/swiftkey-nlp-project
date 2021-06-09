@@ -13,7 +13,9 @@ ui <- navbarPage(
       
       textInput("text", h3("Text Input"), 
                 value = "Enter text..."),
-      actionButton(inputId = "Run", "Run")
+      actionButton(inputId = "Run", "Run"),
+      br(),br(),
+      em("Please note, predictions of '.!?' represent end of sentence predictions.")
       ),
     
     # Main panel for displaying outputs ----
